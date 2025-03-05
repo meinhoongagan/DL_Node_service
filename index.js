@@ -29,7 +29,7 @@ app.use('/api/playlists', playlistRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/apps', appRoutes)
 
-app.get('/dashboard-details/:id', async (req, res) => {
+app.get('/api/dashboard-details/:id', async (req, res) => {
   try {
     
       const { user_id } = req.params;  
