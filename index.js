@@ -29,29 +29,27 @@ app.use('/api/playlists', playlistRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/apps', appRoutes)
 
-app.get('/dashboard-details', async (req, res) => {
+app.get('/dashboard-details/:id', async (req, res) => {
   try {
-      const allPlayers = await Player.find();
-      const recentPlayers = await Player.find().sort({ createdAt: -1 }).limit(4);
+    
+      const { user_id } = req.params;  
 
-      const allPlugins = await Plugin.find();
-      const recentPlugins = await Plugin.find().sort({ createdAt: -1 }).limit(4);
+      const recentPlayers = await Player.findById(user_id).sort({ createdAt: -1 }).limit(4);
 
-      const allPlaylists = await Playlist.find();
-      const recentPlaylists = await Playlist.find().sort({ createdAt: -1 }).limit(4);
+      const recentPlugins = await Plugin.findById(user_id).sort({ createdAt: -1 }).limit(4);
 
-      const allSchedules = await Schedule.find();
-      const recentSchedules = await Schedule.find().sort({ createdAt: -1 }).limit(4);
+      const recentPlaylists = await Playlist.findById(user_id).sort({ createdAt: -1 }).limit(4);
 
-      const allApps = await App.find();
-      const recentApps = await App.find().sort({ createdAt: -1 }).limit(4);
+      const recentSchedules = await Schedule.findById(user_id).sort({ createdAt: -1 }).limit(4);
+
+      const recentApps = await App.findById(user_id).sort({ createdAt: -1 }).limit(4);
 
       res.json({
-          players: { all: allPlayers, recent: recentPlayers },
-          plugins: { all: allPlugins, recent: recentPlugins },
-          playlists: { all: allPlaylists, recent: recentPlaylists },
-          schedules: { all: allSchedules, recent: recentSchedules },
-          apps: { all: allApps, recent: recentApps }
+          players: { recent: recentPlayers },
+          plugins: { recent: recentPlugins },
+          playlists: { recent: recentPlaylists },
+          schedules: { recent: recentSchedules },
+          apps: {  recent: recentApps }
       });
   } catch (error) {
       console.error('Error fetching dashboard details:', error);
