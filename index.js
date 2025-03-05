@@ -31,25 +31,20 @@ app.use('/api/apps', appRoutes)
 
 app.get('/api/dashboard-details/:id', async (req, res) => {
   try {
-    
-      const { user_id } = req.params;  
-
-      const recentPlayers = await Player.findById(user_id).sort({ createdAt: -1 }).limit(4);
-
-      const recentPlugins = await Plugin.findById(user_id).sort({ createdAt: -1 }).limit(4);
-
-      const recentPlaylists = await Playlist.findById(user_id).sort({ createdAt: -1 }).limit(4);
-
-      const recentSchedules = await Schedule.findById(user_id).sort({ createdAt: -1 }).limit(4);
-
-      const recentApps = await App.findById(user_id).sort({ createdAt: -1 }).limit(4);
-
-      res.json({
+       const { id } = req.params;
+       
+       const recentPlayers = await Player.find({ _id: id }).sort({ createdAt: -1 }).limit(4);
+       const recentPlugins = await Plugin.find({ _id: id }).sort({ createdAt: -1 }).limit(4);
+       const recentPlaylists = await Playlist.find({ _id: id }).sort({ createdAt: -1 }).limit(4);
+       const recentSchedules = await Schedule.find({ _id: id }).sort({ createdAt: -1 }).limit(4);
+       const recentApps = await App.find({ _id: id }).sort({ createdAt: -1 }).limit(4);
+       
+       res.json({
           players: { recent: recentPlayers },
           plugins: { recent: recentPlugins },
           playlists: { recent: recentPlaylists },
           schedules: { recent: recentSchedules },
-          apps: {  recent: recentApps }
+          apps: { recent: recentApps }
       });
   } catch (error) {
       console.error('Error fetching dashboard details:', error);
