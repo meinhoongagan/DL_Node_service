@@ -12,11 +12,13 @@ const {Playlist} = require('./models/playlist');
 const {Schedule} = require('./models/schedule');
 const App = require('./models/app');
 
+require('dotenv').config();
+
 const app = express();
 app.use(express.json()); // Middleware for JSON parsing
 
 // Database connection
-mongoose.connect('mongodb://localhost:27017/dl_signage_node', {
+mongoose.connect(process.env.MONGOURL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => console.log('MongoDB Connected'))
