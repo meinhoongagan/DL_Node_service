@@ -11,11 +11,17 @@ const Plugin = require('./models/plugin');
 const {Playlist} = require('./models/playlist');
 const {Schedule} = require('./models/schedule');
 const App = require('./models/app');
+const jwt = require('jsonwebtoken');
+const { jwtDecode } = require("jwt-decode");
+
+
+const cors = require('cors');
 
 require('dotenv').config();
 
 const app = express();
 app.use(express.json()); // Middleware for JSON parsing
+app.use(cors());
 
 // Database connection
 mongoose.connect(process.env.MONGOURL, {
@@ -31,15 +37,24 @@ app.use('/api/playlists', playlistRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/apps', appRoutes)
 
-app.get('/api/dashboard-details/:id', async (req, res) => {
+app.get('/api/dashboard-details/', async (req, res) => {
   try {
-       const { id } = req.params;
+       const token = req.headers.authorization;
+
+       if (!token) {
+          return res.status(401).json({ message: 'Unauthorized' });
+       }
        
-       const recentPlayers = await Player.find({ _id: id }).sort({ createdAt: -1 }).limit(4);
-       const recentPlugins = await Plugin.find({ _id: id }).sort({ createdAt: -1 }).limit(4);
-       const recentPlaylists = await Playlist.find({ _id: id }).sort({ createdAt: -1 }).limit(4);
-       const recentSchedules = await Schedule.find({ _id: id }).sort({ createdAt: -1 }).limit(4);
-       const recentApps = await App.find({ _id: id }).sort({ createdAt: -1 }).limit(4);
+       const decodedToken = jwtDecode(token);
+       const id = decodedToken.sub;
+
+       console.log("Decoded Token:", decodedToken);
+       
+       const recentPlayers = await Player.find({ user: id }).sort({ createdAt: -1 }).limit(4);
+       const recentPlugins = await Plugin.find({ user_id: id }).sort({ createdAt: -1 }).limit(4);
+       const recentPlaylists = await Playlist.find({ user_id: id }).sort({ createdAt: -1 }).limit(4);
+       const recentSchedules = await Schedule.find({ user_id: id }).sort({ createdAt: -1 }).limit(4);
+       const recentApps = await App.find({ user: id }).sort({ createdAt: -1 }).limit(4);
        
        res.json({
           players: { recent: recentPlayers },
