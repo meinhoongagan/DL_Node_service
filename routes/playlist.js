@@ -1,17 +1,18 @@
+// Playlist Router - Summary route added (DELETE already exists)
 const express = require('express');
 const router = express.Router();
-const { Playlist } = require('../models/playlist'); // Ensure this path is correct
+const { Playlist, PlaylistItem } = require('../models/playlist'); // Ensure this path is correct
 
 // ✅ Create a new Playlist
 router.post('/', async (req, res) => {
     try {
         const { playlist_name, playlist_id, user_id, shared_with_users, orientation, thumbnail, animation_type, status } = req.body;
-
+        
         // Basic Validation
         if (!playlist_name || !playlist_id || !user_id) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
-
+        
         const newPlaylist = new Playlist({
             playlist_name,
             playlist_id,
@@ -22,7 +23,7 @@ router.post('/', async (req, res) => {
             animation_type: animation_type || null,
             status: status || 'DRAFT'
         });
-
+        
         const savedPlaylist = await newPlaylist.save();
         res.status(201).json({ message: 'Playlist created successfully', data: savedPlaylist });
     } catch (error) {
@@ -37,6 +38,21 @@ router.get('/', async (req, res) => {
         res.json(playlists);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching playlists', error: error.message });
+    }
+});
+
+// ✅ Get Playlist Summary
+router.get('/summary', async (req, res) => {
+    try {
+        const playlistCount = await Playlist.countDocuments();
+        const playlistItemCount = await PlaylistItem.countDocuments();
+        
+        res.json({ 
+            total_playlists: playlistCount,
+            total_playlist_items: playlistItemCount
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching playlist summary', error: error.message });
     }
 });
 
@@ -74,6 +90,16 @@ router.post('/items', async (req, res) => {
         res.status(201).json({ message: 'Playlist item created successfully', data: savedPlaylistItem });
     } catch (error) {
         res.status(400).json({ message: 'Error creating playlist item', error: error.message });
+    }
+});
+
+// ✅ Get Playlist Items
+router.get('/items', async (req, res) => {
+    try {
+        const playlistItems = await PlaylistItem.find();
+        res.json(playlistItems);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching playlist items', error: error.message });
     }
 });
 

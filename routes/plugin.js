@@ -23,6 +23,16 @@ router.get('/', async (req, res) => {
     }
 });
 
+// ✅ Get Plugin Summary
+router.get('/summary', async (req, res) => {
+    try {
+        const count = await Plugin.countDocuments();
+        res.json({ total: count });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching plugin summary', error: error.message });
+    }
+});
+
 // ✅ Update a Plugin by ID
 router.put('/:id', async (req, res) => {
     try {

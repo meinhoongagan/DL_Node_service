@@ -1,6 +1,7 @@
+// Schedule Router - DELETE already exists, adding summary
 const express = require('express');
 const router = express.Router();
-const { Schedule , ScheduleContent} = require('../models/schedule'); // Import Schedule model
+const { Schedule, ScheduleContent } = require('../models/schedule'); // Import Schedule model
 
 // ✅ Create a new Schedule
 router.post('/', async (req, res) => {
@@ -20,6 +21,21 @@ router.get('/', async (req, res) => {
         res.json(schedules);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching schedules', error: error.message });
+    }
+});
+
+// ✅ Get Schedule Summary
+router.get('/summary', async (req, res) => {
+    try {
+        const scheduleCount = await Schedule.countDocuments();
+        const contentCount = await ScheduleContent.countDocuments();
+        
+        res.json({ 
+            total_schedules: scheduleCount,
+            total_schedule_contents: contentCount
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching schedule summary', error: error.message });
     }
 });
 
@@ -57,6 +73,29 @@ router.post('/content', async (req, res) => {
         res.status(201).json({ message: 'Schedule content created successfully', data: savedScheduleContent });
     } catch (error) {
         res.status(400).json({ message: 'Error creating schedule content', error: error.message });
+    }
+});
+
+// ✅ Get all Schedule Contents
+router.get('/content', async (req, res) => {
+    try {
+        const scheduleContents = await ScheduleContent.find();
+        res.json(scheduleContents);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching schedule contents', error: error.message });
+    }
+});
+
+// ✅ Delete a Schedule Content by ID
+router.delete('/content/:id', async (req, res) => {
+    try {
+        const deletedContent = await ScheduleContent.find({ content_id: req.params.id }).deleteOne();
+        if (!deletedContent) {
+            return res.status(404).json({ message: 'Schedule content not found' });
+        }
+        res.json({ message: 'Schedule content deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting schedule content', error: error.message });
     }
 });
 
