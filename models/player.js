@@ -9,14 +9,14 @@ const PlayerSchema = new mongoose.Schema({
     status: { type: String, enum: ['PENDING', 'UPTO'], default: 'PENDING' }
 }, { timestamps: true });
 
-const PlayerSummarySchema = new mongoose.Schema({
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    total_screens: { type: Number, required: true },
-    active_screens: { type: Number, required: true },
-    inactive_screens: { type: Number, required: true },
-    status_breakdown: { type: [StatusBreakdownSchema], required: true }
-}, { timestamps: true });
+// const PlayerSummarySchema = new mongoose.Schema({
+//     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+//     total_screens: { type: Number, required: true },
+//     active_screens: { type: Number, required: true },
+//     inactive_screens: { type: Number, required: true },
+//     status_breakdown: { type: [StatusBreakdownSchema], required: true }
+// }, { timestamps: true });
 
 const Player = mongoose.model('Player', PlayerSchema);
-const PlayerSummary = mongoose.model('PlayerSummary', PlayerSummarySchema);
-module.exports = {Player,PlayerSummary};
+// const PlayerSummary = mongoose.model('PlayerSummary', PlayerSummarySchema);
+module.exports = Player;
