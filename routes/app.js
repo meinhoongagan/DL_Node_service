@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const App = require('../models/app');
+const Summary = require('../models/summary'); // Assuming you have a summary model
 
 // 🎯 POST API - Create a new App
 router.post('/', async (req, res) => {
@@ -9,6 +10,13 @@ router.post('/', async (req, res) => {
         
         const newApp = new App(appData);
         const savedApp = await newApp.save();
+        // Update the summary document by user
+        const summary = await Summary.findOneAndUpdate(
+            { user: appData.user }, // Assuming you want to update by user
+            { $inc: { total_apps: 1 } }, // Increment the total_apps count
+            { new: true, upsert: true } // Create a new document if it doesn't exist
+        );
+
         res.status(201).json({ message: 'App created successfully', data: savedApp });
     } catch (error) {
         res.status(400).json({ message: 'Error creating app', error: error.message });

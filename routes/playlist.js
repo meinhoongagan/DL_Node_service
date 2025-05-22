@@ -25,6 +25,12 @@ router.post('/', async (req, res) => {
         });
         
         const savedPlaylist = await newPlaylist.save();
+        // Update the summary document
+        const summary = await Summary.findOneAndUpdate(
+            {user: user_id}, // Assuming you want to update by user
+            { $inc: { total_playlists: 1 } }, // Increment the total_playlists count
+            { new: true, upsert: true } // Create a new document if it doesn't exist
+        );
         res.status(201).json({ message: 'Playlist created successfully', data: savedPlaylist });
     } catch (error) {
         res.status(500).json({ message: 'Error creating playlist', error: error.message });
@@ -88,6 +94,17 @@ router.post('/items', async (req, res) => {
         const newPlaylistItem = new PlaylistItem(req.body);
         const savedPlaylistItem = await newPlaylistItem.save();
         res.status(201).json({ message: 'Playlist item created successfully', data: savedPlaylistItem });
+        // Update the summary document
+        const summary = await Summary.findOneAndUpdate(
+            {user: req.body.user_id}, // Assuming you want to update by user
+            {
+                $inc: {
+                    total_playlist_items: 1
+                }
+            },
+            { new: true }
+        );
+        res.json({ message: 'Playlist item created successfully', data: savedPlaylistItem });
     } catch (error) {
         res.status(400).json({ message: 'Error creating playlist item', error: error.message });
     }

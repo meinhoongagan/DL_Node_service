@@ -1,12 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const Plugin = require('../models/plugin'); // Import Plugin model
+const Plugin = require('../models/plugin'); 
+const Summary = require('../models/summary'); 
 
-// ✅ Create a new Plugin
 router.post('/', async (req, res) => {
     try {
         const newPlugin = new Plugin(req.body);
         const savedPlugin = await newPlugin.save();
+        // Update the summary document
+        const summary = await Summary.findOneAndUpdate(
+            { user: req.body.user_id }, 
+            { $inc: { total_plugins: 1 } }, 
+            { new: true, upsert: true } 
+        );
         res.status(201).json({ message: 'Plugin created successfully', data: savedPlugin });
     } catch (error) {
         res.status(400).json({ message: 'Error creating plugin', error: error.message });

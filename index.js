@@ -14,8 +14,11 @@ const App = require('./models/app');
 const jwt = require('jsonwebtoken');
 const { jwtDecode } = require("jwt-decode");
 
+const { cleanupOldRecords } = require('./cron');
+
 
 const cors = require('cors');
+const Summary = require('./models/summary');
 
 require('dotenv').config();
 
@@ -49,19 +52,21 @@ app.get('/api/dashboard-details/', async (req, res) => {
        const id = decodedToken.sub;
 
        console.log("Decoded Token:", decodedToken);
-       
+      console.log("ID:", id);
        const recentPlayers = await Player.find({ user: id }).sort({ createdAt: -1 }).limit(4);
        const recentPlugins = await Plugin.find({ user_id: id }).sort({ createdAt: -1 }).limit(4);
        const recentPlaylists = await Playlist.find({ user_id: id }).sort({ createdAt: -1 }).limit(4);
        const recentSchedules = await Schedule.find({ user_id: id }).sort({ createdAt: -1 }).limit(4);
        const recentApps = await App.find({ user: id }).sort({ createdAt: -1 }).limit(4);
-       
+      const summary = await Summary.find({ user: id });
        res.json({
           players: { recent: recentPlayers },
           plugins: { recent: recentPlugins },
           playlists: { recent: recentPlaylists },
           schedules: { recent: recentSchedules },
-          apps: { recent: recentApps }
+          apps: { recent: recentApps },
+          templates: { recent: [] },
+          summary: summary 
       });
   } catch (error) {
       console.error('Error fetching dashboard details:', error);
@@ -72,4 +77,8 @@ app.get('/api/dashboard-details/', async (req, res) => {
 
 // Start the server
 const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => 
+  {
+    cleanupOldRecords(); 
+    console.log(`Server running on port ${PORT}`)
+  });

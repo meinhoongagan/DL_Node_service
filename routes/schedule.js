@@ -1,13 +1,19 @@
-// Schedule Router - DELETE already exists, adding summary
 const express = require('express');
 const router = express.Router();
-const { Schedule, ScheduleContent } = require('../models/schedule'); // Import Schedule model
+const { Schedule, ScheduleContent } = require('../models/schedule');
+const Summary = require('../models/summary');
 
 // ✅ Create a new Schedule
 router.post('/', async (req, res) => {
     try {
         const newSchedule = new Schedule(req.body);
         const savedSchedule = await newSchedule.save();
+        // Update the summary document
+        const summary = await Summary.findOneAndUpdate(
+            { user: req.body.user_id }, 
+            { $inc: { total_schedules: 1 } },
+            { new: true, upsert: true }
+        );
         res.status(201).json({ message: 'Schedule created successfully', data: savedSchedule });
     } catch (error) {
         res.status(400).json({ message: 'Error creating schedule', error: error.message });

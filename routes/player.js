@@ -1,26 +1,30 @@
-// Player Router with added GET routes and summary
 const express = require('express');
 const router = express.Router();
-const Player = require('../models/player'); // Assuming this import
-const mongoose = require('mongoose'); // Added for connection logging
+const Player = require('../models/player'); 
+const mongoose = require('mongoose'); 
+const Summary = require('../models/summary'); 
 
-// ✅ Create a new Player (POST)
 router.post('/', async (req, res) => {
     try {
-        console.log("Incoming request body:", req.body); // Log request data
+        console.log("Incoming request body:", req.body); 
         
-        console.log("Mongoose connected to:", mongoose.connection.name); // Log DB name
+        console.log("Mongoose connected to:", mongoose.connection.name); 
         
         const newPlayer = new Player(req.body);
-        const savedPlayer = await newPlayer.save(); // ✅ Save to DB
+        const savedPlayer = await newPlayer.save();
+        // Update the summary document
+        const summary = await Summary.findOneAndUpdate(
+            {user: req.body.user}, // Assuming you want to update by user
+            { $inc: { total_players: 1 } },
+            { new: true, upsert: true } 
+        );
         res.status(201).json({ message: 'Player created successfully', data: savedPlayer });
     } catch (error) {
-        console.error("Error saving player:", error); // Log error
+        console.error("Error saving player:", error); 
         res.status(400).json({ message: 'Error creating player', error: error.message });
     }
 });
 
-// ✅ Get all Players (GET)
 router.get('/', async (req, res) => {
     try {
         const players = await Player.find();
